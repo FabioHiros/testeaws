@@ -40,13 +40,13 @@ jobs:
         run: |
           # Get MongoDB connection string
           MONGO_SECRET=$(aws secretsmanager get-secret-value \
-            --secret-id "esp32-sensor-server/mongodb" \
+            --secret-id "mongo" \
             --query SecretString --output text)
 
           # Get MQTT credentials
           MQTT_SECRET=$(aws secretsmanager get-secret-value \
-            --secret-id "esp32-sensor-server/mqtt" \
-            --query SecretString --output text)
+          --secret-id "mqtt" \
+          --query SecretString --output text)
 
           # Parse and export secrets (they should be JSON format)
           echo "MONGO_CONNECTION_STRING=$(echo $MONGO_SECRET | jq -r '.connectionString')" >> $GITHUB_ENV
