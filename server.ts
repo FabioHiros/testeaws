@@ -20,7 +20,7 @@ class ESP32MQTTServer {
     this.mqttClient = mqtt.connect(process.env.MQTT_HOST!, {
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
-  rejectUnauthorized: process.env.NODE_ENV === 'production'
+  rejectUnauthorized: false
 });
     this.mongoClient = new MongoClient(mongoUrl);
     this.app = express();
