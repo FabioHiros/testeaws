@@ -1,7 +1,7 @@
 import mqtt from 'mqtt';
 import { MongoClient, Db, Collection } from 'mongodb';
 import dotenv from 'dotenv';
-import express from 'express';
+import express, { Request, Response } from 'express';
 
 // Load environment variables
 dotenv.config();
@@ -9,8 +9,8 @@ dotenv.config();
 class ESP32MQTTServer {
   private mqttClient: mqtt.MqttClient;
   private mongoClient: MongoClient;
-  private db: Db;
-  private collection: Collection<any>;
+  private db!: Db;
+  private collection!: Collection<any>;
   private messageCount = 0;
   private app: express.Application;
 
@@ -51,7 +51,7 @@ class ESP32MQTTServer {
     this.app.use(express.json());
 
     // Health check endpoint for CI/CD
-    this.app.get('/health', (req, res) => {
+    this.app.get('/health', (req: Request, res: Response) => {
       res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -61,7 +61,7 @@ class ESP32MQTTServer {
     });
 
     // Basic stats endpoint
-    this.app.get('/stats', (req, res) => {
+    this.app.get('/stats', (req: Request, res: Response) => {
       res.json({
         messagesProcessed: this.messageCount,
         mqttConnected: this.mqttClient.connected,
