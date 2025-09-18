@@ -1,7 +1,8 @@
 # Multi-stage Dockerfile for ESP32 Sensor Data Server
-# Optimized for production deployment on AWS EC2
 
+# ----------------------------------------------------------------
 # Build stage - Install dependencies and compile TypeScript
+# ----------------------------------------------------------------
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -9,16 +10,19 @@ WORKDIR /app
 # Copy package files first for better Docker layer caching
 COPY package*.json ./
 
-# Install dependencies (including devDependencies for TypeScript compilation)
+# Install all dependencies (including devDependencies for TypeScript compilation)
 RUN npm ci
 
-# Copy source code
+# Copy the rest of the source code
 COPY . .
 
-# Compile TypeScript to JavaScript
-RUN npx tsc
+# Compile TypeScript to JavaScript using the build script
+RUN npm run build
 
+
+# ----------------------------------------------------------------
 # Production stage - Minimal runtime image
+# ----------------------------------------------------------------
 FROM node:18-alpine AS production
 
 # Add metadata
@@ -35,16 +39,12 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production && \
+RUN npm ci --omit=dev && \
     npm cache clean --force
 
-# Copy compiled JavaScript from builder stage
+# Copy compiled JavaScript from the builder stage
+# This is the only code we need to copy
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server.js ./
-
-# Copy other necessary files
-COPY --from=builder /app/README.md ./
-COPY --from=builder /app/examples ./examples
 
 # Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app
@@ -59,5 +59,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
-# Start the application
-CMD ["node", "server.js"]
+# Start the application from the correct compiled file
+CMD ["node", "dist/server.js"]

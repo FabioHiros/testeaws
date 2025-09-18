@@ -4,9 +4,10 @@
   "description": "Node.js server to receive ESP32 sensor data and save to MongoDB",
   "type": "module",
   "main": "server.ts",
-  "scripts": {
+"scripts": {
     "start": "npx ts-node server.ts",
-    "dev": "nodemon server.ts"
+    "dev": "nodemon server.ts",
+    "build": "npx tsc"
   },
   "keywords": [
     "esp32",
