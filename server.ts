@@ -1,7 +1,8 @@
 import mqtt from 'mqtt';
 import { MongoClient, Db, Collection } from 'mongodb';
 import dotenv from 'dotenv';
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 
 // Load environment variables
 dotenv.config();
