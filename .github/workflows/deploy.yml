@@ -9,7 +9,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: esp32-sensor-server
+  ECR_REPOSITORY: testeaws
   ECS_SERVICE: esp32-sensor-service
   ECS_CLUSTER: esp32-cluster
 
