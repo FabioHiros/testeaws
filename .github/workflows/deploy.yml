@@ -68,10 +68,10 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Deploy to EC2
+            - name: Deploy to EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }} # For Ubuntu, this is 'ubuntu'
+          EC2_USER: ${{ secrets.EC2_USER }}
           EC2_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
@@ -83,12 +83,15 @@ jobs:
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
           # SSH into EC2 and run deployment commands
-          # Secrets are passed directly from the GitHub runner's environment
+          # We pass the AWS credentials from the runner to the EC2 session
           ssh -i ~/.ssh/id_rsa "$EC2_USER@$EC2_HOST" "
+            export AWS_ACCESS_KEY_ID='${{ env.AWS_ACCESS_KEY_ID }}'
+            export AWS_SECRET_ACCESS_KEY='${{ env.AWS_SECRET_ACCESS_KEY }}'
+            export AWS_SESSION_TOKEN='${{ env.AWS_SESSION_TOKEN }}'
             set -e # Exit script on any error
 
             echo 'Logging into AWS ECR...'
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
 
             echo 'Pulling the latest Docker image...'
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
