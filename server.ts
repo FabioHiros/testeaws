@@ -21,11 +21,13 @@ class ESP32MQTTServer {
     this.mqttClient = mqtt.connect(process.env.MQTT_HOST!, {
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
-  rejectUnauthorized: false
+   rejectUnauthorized: false
 });
     this.mongoClient = new MongoClient(mongoUrl);
     this.app = express();
     this.setupExpress();
+
+      this.setupMQTT();
   }
 
   async start(): Promise<void> {
@@ -40,7 +42,6 @@ class ESP32MQTTServer {
       await this.collection.createIndex({ uuid: 1, unixtime: -1 });
       await this.collection.createIndex({ unixtime: -1 });
 
-      this.setupMQTT();
       this.startHttpServer();
     } catch (error) {
       console.error('❌ Failed to start server:', error);
